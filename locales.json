@@ -1,7 +1,7 @@
 {
 	"gemini_api_warning": {
-		"en": "[bold red]Warning:[/bold red] GEMINI_API_KEY not set. Agent will not work. Get an API key here: [link=https://aistudio.google.com/app/api-keys]https://aistudio.google.com/app/api-keys[/link]",
-		"ru": "[bold red]Внимание:[/bold red] GEMINI_API_KEY не настроен. Агент не сможет работь. Получите API ключ здесь: [link=https://aistudio.google.com/app/api-keys]https://aistudio.google.com/app/api-keys[/link]"
+		"en": "GEMINI_API_KEY is not set. Enter the key ([blue][link=https://aistudio.google.com/app/api-keys]https://aistudio.google.com/app/api-keys[/link][/blue])",
+		"ru": "GEMINI_API_KEY не задан. Введите ключ ([blue][link=https://aistudio.google.com/app/api-keys]https://aistudio.google.com/app/api-keys[/link][/blue])"
 	}
 }
 

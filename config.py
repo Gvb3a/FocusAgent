@@ -1,14 +1,11 @@
-import os
 import json
-import rich
+import rich.prompt
 from pathlib import Path
-from dotenv import load_dotenv
 from dataclasses import dataclass
+from database import get_env_settings, set_setting
 
-
-load_dotenv()
 base_dir = Path(__file__).parent
-
+env_settings = get_env_settings()
 
 @dataclass
 class Config:
@@ -17,9 +14,9 @@ class Config:
     locales_path: str = str(base_dir / "locales.json")
     log_path: str = str(base_dir / "agent.log")
 
-    language: str = os.getenv("LANGUAGE", "en")
-    gemini_api_key: str = os.getenv("GEMINI_API_KE", "")
-    gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    language: str = env_settings['LANGUAGE']
+    gemini_api_key: str = env_settings['GEMINI_API_KEY']
+    gemini_model: str = env_settings['GEMINI_MODEL']
 
     monitoring_interval: int = 600
 
@@ -70,11 +67,14 @@ class Locales:
     def __post_init__(self):
         with open(base_dir / "locales.json", "r") as f:
             data = json.load(f)
-            self.gemini_api_warning = data.get("gemini_api_warning", {})
+            self.gemini_api_warning = data["gemini_api_warning"]
 
 
 locales = Locales()
 
 
 if not config.gemini_api_key:
-    rich.print(locales.gemini_api_warning[config.language])
+    gemini_api_key = rich.prompt.Prompt.ask(locales.gemini_api_warning[config.language]).strip()
+    config.gemini_api_key = gemini_api_key
+    set_setting('GEMINI_API_KEY', gemini_api_key)
+
