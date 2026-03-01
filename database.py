@@ -450,6 +450,8 @@ def delete_exercise(exercise_id):
 # ╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗╚██████╔╝╚██████╔╝   ██║   
 #  ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝   
                                                               
+
+
 def create_workout(exercise_id, sets, reps, weight=None):
     """
     Create a new workout record
@@ -601,6 +603,7 @@ def delete_workout(workout_id):
 # ██║ ╚═╝ ██║╚██████╔╝██║ ╚████║██║   ██║   ╚██████╔╝██║  ██║██║██║ ╚████║╚██████╔╝
 # ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝ 
                                                                                  
+
 
 def log_monitoring(windows_and_tabs):
     """
