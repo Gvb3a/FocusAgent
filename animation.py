@@ -68,3 +68,45 @@ def show_logo():
 if __name__ == "__main__":
     animate_greeting("Test User")
     show_logo()
+
+
+import sys
+import threading
+from itertools import cycle
+
+def animate_loading(text, stop_event):
+    """Анимация загрузки с тремя точками"""
+    dots_frames = ['   ', '.  ', '.. ', '...']
+    dots = cycle(dots_frames)
+    
+    sys.stdout.write(f"\033[36m{text}")  # cyan
+    sys.stdout.flush()
+    
+    while not stop_event.is_set():
+        frame = next(dots)
+        sys.stdout.write(f"\r{text}{frame}")
+        sys.stdout.flush()
+        time.sleep(0.3)
+    
+    # Очистка строки
+    sys.stdout.write('\r' + ' ' * (len(text) + 3) + '\r')
+    sys.stdout.write("\033[0m")  # reset
+    sys.stdout.flush()
+
+class LoadingAnimation:
+    """Контекстный менеджер для анимации загрузки"""
+    def __init__(self, text):
+        self.text = text
+        self.stop_event = threading.Event()
+        self.thread = None
+    
+    def __enter__(self):
+        self.stop_event.clear()
+        self.thread = threading.Thread(target=animate_loading, args=(self.text, self.stop_event))
+        self.thread.start()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop_event.set()
+        if self.thread:
+            self.thread.join()
