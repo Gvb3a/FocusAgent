@@ -2,6 +2,44 @@
 	"gemini_api_warning": {
 		"en": "GEMINI_API_KEY is not set. Enter the key ([blue][link=https://aistudio.google.com/app/api-keys]https://aistudio.google.com/app/api-keys[/link][/blue])",
 		"ru": "GEMINI_API_KEY не задан. Введите ключ ([blue][link=https://aistudio.google.com/app/api-keys]https://aistudio.google.com/app/api-keys[/link][/blue])"
+	},
+	"username_warning": {
+		"en": "What should I call you (Enter for {username})",
+		"ru": "Как к вам обращаться (Enter для {username})"
+	},
+	"morning_greeting": {
+		"ru": "Доброе утро, {username}", 
+		"en": "Good morning, {username}"
+	},
+	"afternoon_greeting": {
+		"ru": "Добрый день, {username}", 
+		"en": "Good afternoon, {username}"
+	},
+	"evening_greeting": {
+		"ru": "Добрый вечер, {username}", 
+		"en": "Good evening, {username}"
+	},
+	"night_greeting": {
+		"ru": "Доброй ночи, {username}", 
+		"en": "Good night, {username}"
+	},
+	"launch_message": {
+		"ru": "[cyan bold]Запуск FocusAgent...[/cyan bold]", 
+		"en": "[cyan bold]Launching FocusAgent...[/cyan bold]"
+	},
+	"focus_agent_inscription": {
+		"normal": {
+			"text": "  FocusAgent",
+			"length": 10
+		},
+		"ansi_compact": {
+			"text": "██████ ▄▄▄   ▄▄▄▄ ▄▄ ▄▄  ▄▄▄▄    ▄▄▄   ▄▄▄▄ ▄▄▄▄▄ ▄▄  ▄▄ ▄▄▄▄▄▄\n██▄▄  ██▀██ ██▀▀▀ ██ ██ ███▄▄   ██▀██ ██ ▄▄ ██▄▄  ███▄██   ██\n██    ▀███▀ ▀████ ▀███▀ ▄▄██▀   ██▀██ ▀███▀ ██▄▄▄ ██ ▀██   ██",
+			"length": 63
+		},
+		"ansi_shadow": {
+			"text": "███████╗ ██████╗  ██████╗██╗   ██╗███████╗     █████╗  ██████╗ ███████╗███╗   ██╗████████╗\n██╔════╝██╔═══██╗██╔════╝██║   ██║██╔════╝    ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝\n█████╗  ██║   ██║██║     ██║   ██║███████╗    ███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   \n██╔══╝  ██║   ██║██║     ██║   ██║╚════██║    ██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   \n██║     ╚██████╔╝╚██████╗╚██████╔╝███████║    ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   \n╚═╝      ╚═════╝  ╚═════╝ ╚═════╝ ╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝",
+			"length": 90
+		}
 	}
 }
 

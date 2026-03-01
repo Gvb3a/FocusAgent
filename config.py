@@ -60,6 +60,7 @@ class Config:
     log_path: str = str(base_dir / "agent.log")
 
     language: str = env_settings['LANGUAGE']
+    username: str = env_settings['USERNAME']
     gemini_api_key: str = env_settings['GEMINI_API_KEY']
     gemini_model: str = env_settings['GEMINI_MODEL']
 
@@ -67,14 +68,14 @@ class Config:
 
     conversation_tools: list = None
     monitoring_tools: list = None
-    api_key_warning: str = ""
+    api_key_warning: str = ""  # ?
     
     system_prompt: str = ""
     monitoring_prompt: str = ""
 
     def __post_init__(self):
         # Load prompts
-        prompts = load_json('prompts.json')
+        prompts = load_json(base_dir / 'prompts.json')
         self.system_prompt = prompts['system_prompt']
         self.monitoring_prompt = prompts['monitoring_prompt']
         
@@ -119,19 +120,26 @@ config = Config()
 
 @dataclass
 class Locales:
-    gemini_api_warning: dict = None
-
+    gemini_api_warning: dict[str] = None
+    launch_message: dict[str] = None
+    username_warning: dict[str] = None
+    morning_greeting: dict[str] = None
+    afternoon_greeting: dict[str] = None
+    evening_greeting: dict[str] = None
+    night_greeting: dict[str] = None
+    focus_agent_inscription: dict = None
     def __post_init__(self):
         with open(base_dir / "locales.json", "r") as f:
             data = json.load(f)
             self.gemini_api_warning = data["gemini_api_warning"]
+            self.launch_message = data["launch_message"]
+            self.username_warning = data["username_warning"]
+            self.morning_greeting = data["morning_greeting"]
+            self.afternoon_greeting = data["afternoon_greeting"]
+            self.evening_greeting = data["evening_greeting"]
+            self.night_greeting = data["night_greeting"]
+            self.focus_agent_inscription = data["focus_agent_inscription"]
 
 
 locales = Locales()
-
-
-if not config.gemini_api_key:
-    gemini_api_key = rich.prompt.Prompt.ask(locales.gemini_api_warning[config.language]).strip()
-    config.gemini_api_key = gemini_api_key
-    database.set_setting('GEMINI_API_KEY', gemini_api_key)
 

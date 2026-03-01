@@ -132,7 +132,7 @@ def chat(user_message, tools_list=None, messages=None, print_function_calls=True
     return "Max iterations reached. Please try again."
 
 
-def monitor_and_act():
+def agent_monitoring():
     """
     Monitoring mode: check windows and decide if action needed
     """

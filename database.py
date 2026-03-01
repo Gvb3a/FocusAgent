@@ -3,6 +3,7 @@ import sqlite3
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+import getpass
 
 
 
@@ -31,7 +32,11 @@ settings = [{  # TODO: показывать ли вызовы функций
 }, {
     'key': 'LANGUAGE',
     'description': 'User interface language (en, ru)',
-    'default': 'en'
+    'default': ''
+}, {
+    'key': 'USERNAME',
+    'description': 'User name for greetings',
+    'default': ''
 }, {
     'key': 'MEMORY',
     'description': 'Memory for agent)',
