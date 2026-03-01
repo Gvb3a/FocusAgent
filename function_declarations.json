@@ -1,0 +1,385 @@
+[
+  {
+    "name": "create_activity",
+    "description": "Create a new activity record with start time, end time, category and description. Use this to log what the user did during a specific time period.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "start_time": {
+          "type": "string",
+          "description": "Activity start time in format 'YYYY-MM-DD HH:MM:SS' or 'YYYY-MM-DD'"
+        },
+        "end_time": {
+          "type": "string",
+          "description": "Activity end time in format 'YYYY-MM-DD HH:MM:SS' or 'YYYY-MM-DD'"
+        },
+        "category": {
+          "type": "string",
+          "description": "Activity category (e.g., 'work', 'study', 'exercise', 'entertainment', 'rest')"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of what the user did"
+        }
+      },
+      "required": ["start_time", "end_time", "category", "description"]
+    }
+  },
+  {
+    "name": "get_activities",
+    "description": "Get list of activities for a specific day. Returns activities sorted by start time.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "description": "Maximum number of activities to return (default: 10)"
+        },
+        "day_offset": {
+          "type": "integer",
+          "description": "Day offset: 0 for today, -1 for yesterday, 1 for tomorrow (default: 0)"
+        }
+      }
+    }
+  },
+  {
+    "name": "update_activity",
+    "description": "Update an existing activity. Can update start time, end time, category, or description.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "activity_id": {
+          "type": "integer",
+          "description": "ID of the activity to update"
+        },
+        "start_time": {
+          "type": "string",
+          "description": "New start time in format 'YYYY-MM-DD HH:MM:SS'"
+        },
+        "end_time": {
+          "type": "string",
+          "description": "New end time in format 'YYYY-MM-DD HH:MM:SS'"
+        },
+        "category": {
+          "type": "string",
+          "description": "New category"
+        },
+        "description": {
+          "type": "string",
+          "description": "New description"
+        }
+      },
+      "required": ["activity_id"]
+    }
+  },
+  {
+    "name": "delete_activity",
+    "description": "Delete an activity by its ID.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "activity_id": {
+          "type": "integer",
+          "description": "ID of the activity to delete"
+        }
+      },
+      "required": ["activity_id"]
+    }
+  },
+  {
+    "name": "get_all_exercises",
+    "description": "Get all exercises from the database with their details (muscle group, equipment, category).",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "find_exercise",
+    "description": "Search for exercises by name, muscle group, equipment, or category. Returns matching exercises sorted by relevance.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "search_term": {
+          "type": "string",
+          "description": "Search term to find exercises (e.g., 'bench press', 'chest', 'barbell')"
+        }
+      },
+      "required": ["search_term"]
+    }
+  },
+  {
+    "name": "create_exercise",
+    "description": "Create a new exercise in the database. Exercise name must be unique.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Exercise name (e.g., 'Bench Press', 'Squat')"
+        },
+        "muscle_group": {
+          "type": "string",
+          "description": "Target muscle group (e.g., 'chest', 'legs', 'back', 'shoulders', 'arms')"
+        },
+        "equipment": {
+          "type": "string",
+          "description": "Required equipment (e.g., 'barbell', 'dumbbell', 'bodyweight', 'machine')"
+        },
+        "category": {
+          "type": "string",
+          "description": "Exercise category (e.g., 'strength', 'cardio', 'flexibility')"
+        }
+      },
+      "required": ["name", "muscle_group", "equipment", "category"]
+    }
+  },
+  {
+    "name": "update_exercise",
+    "description": "Update an existing exercise details.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "exercise_id": {
+          "type": "integer",
+          "description": "ID of the exercise to update"
+        },
+        "name": {
+          "type": "string",
+          "description": "New exercise name"
+        },
+        "muscle_group": {
+          "type": "string",
+          "description": "New muscle group"
+        },
+        "equipment": {
+          "type": "string",
+          "description": "New equipment"
+        },
+        "category": {
+          "type": "string",
+          "description": "New category"
+        }
+      },
+      "required": ["exercise_id"]
+    }
+  },
+  {
+    "name": "delete_exercise",
+    "description": "Delete an exercise from the database.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "exercise_id": {
+          "type": "integer",
+          "description": "ID of the exercise to delete"
+        }
+      },
+      "required": ["exercise_id"]
+    }
+  },
+  {
+    "name": "create_workout",
+    "description": "Log a workout with exercise, sets, reps, and optional weight and timestamp.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "exercise_id": {
+          "type": "integer",
+          "description": "ID of the exercise performed"
+        },
+        "sets": {
+          "type": "integer",
+          "description": "Number of sets performed"
+        },
+        "reps": {
+          "type": "integer",
+          "description": "Number of repetitions per set"
+        },
+        "weight": {
+          "type": "number",
+          "description": "Weight used in kg (optional)"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Workout timestamp in format 'YYYY-MM-DD HH:MM:SS' (optional, defaults to now)"
+        }
+      },
+      "required": ["exercise_id", "sets", "reps"]
+    }
+  },
+  {
+    "name": "get_workouts",
+    "description": "Get workout history for a specific day with exercise names.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "day_offset": {
+          "type": "integer",
+          "description": "Day offset: 0 for today, -1 for yesterday (default: 0)"
+        }
+      }
+    }
+  },
+  {
+    "name": "update_workout",
+    "description": "Update an existing workout record. Can update exercise, sets, reps, weight, or timestamp.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "workout_id": {
+          "type": "integer",
+          "description": "ID of the workout to update"
+        },
+        "exercise_id": {
+          "type": "integer",
+          "description": "New exercise ID"
+        },
+        "sets": {
+          "type": "integer",
+          "description": "New number of sets"
+        },
+        "reps": {
+          "type": "integer",
+          "description": "New number of reps"
+        },
+        "weight": {
+          "type": "number",
+          "description": "New weight in kg"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "New timestamp in format 'YYYY-MM-DD HH:MM:SS'"
+        }
+      },
+      "required": ["workout_id"]
+    }
+  },
+  {
+    "name": "delete_workout",
+    "description": "Delete a workout record by its ID.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "workout_id": {
+          "type": "integer",
+          "description": "ID of the workout to delete"
+        }
+      },
+      "required": ["workout_id"]
+    }
+  },
+  {
+    "name": "get_time",
+    "description": "Get current date and time as a string in format 'YYYY-MM-DD HH:MM:SS'.",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "get_all_windows",
+    "description": "Get list of all open windows and applications on the user's system.",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "get_current_window_title",
+    "description": "Get the currently active window title and application name.",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "close_browser",
+    "description": "Close all web browsers (Chrome, Firefox, Safari). Use this when user is procrastinating on social media or distracting websites.",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "close_app",
+    "description": "Close a specific application by name. Use this to close distracting apps.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "app_name": {
+          "type": "string",
+          "description": "Name of the application to close (e.g., 'Telegram', 'Discord', 'Slack')"
+        }
+      },
+      "required": ["app_name"]
+    }
+  },
+  {
+    "name": "log_monitoring",
+    "description": "Log current windows and tabs for monitoring purposes. Internal function.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "windows_and_tabs": {
+          "type": "string",
+          "description": "String containing current windows and tabs information"
+        }
+      },
+      "required": ["windows_and_tabs"]
+    }
+  },
+  {
+    "name": "get_monitoring_logs",
+    "description": "Get monitoring logs for a specific time period to analyze user's activity patterns.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "hours_back": {
+          "type": "integer",
+          "description": "Number of hours back to retrieve logs (default: 4)"
+        },
+        "day_offset": {
+          "type": "integer",
+          "description": "Day offset: 0 for today, -1 for yesterday (default: 0)"
+        }
+      }
+    }
+  },
+  {
+    "name": "get_memory",
+    "description": "Get user's memory and preferences. Contains important context about user's habits, goals, and preferences.",
+    "parameters": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "update_memory",
+    "description": "Replace entire user memory with new content. Use this to completely rewrite memory.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "New memory content"
+        }
+      },
+      "required": ["content"]
+    }
+  },
+  {
+    "name": "add_to_memory",
+    "description": "Append new information to user's memory. Use this to remember important facts about user's preferences, goals, or habits.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "Content to add to memory"
+        }
+      },
+      "required": ["content"]
+    }
+  }
+]

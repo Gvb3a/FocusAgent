@@ -20,7 +20,7 @@ database_path = Path(__file__).parent / 'database.db'
                                                                                               
 
 
-settings = [{
+settings = [{  # TODO: показывать ли вызовы функций
     'key': 'GEMINI_API_KEY',
     'description': 'API key for Google Gemini LLM',
     'default': ''
@@ -177,7 +177,6 @@ def create_activity(start_time, end_time, category, description):
     connection.close()
 
     return activity_id
-
 
 
 def get_activities(limit=10, day_offset=0):
