@@ -5,8 +5,10 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
 
+
 load_dotenv()
 database_path = Path(__file__).parent / 'database.db'
+
 
 
 # ██╗███╗   ██╗██╗████████╗██╗ █████╗ ██╗     ██╗███████╗ █████╗ ████████╗██╗ ██████╗ ███╗   ██╗
@@ -64,7 +66,7 @@ def init_database():
         )
     ''')
     
-    # TODO: time
+
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS workouts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -221,6 +223,56 @@ def get_activities(limit=10, day_offset=0):
         })
     
     return activities
+
+
+
+def update_activity(activity_id, start_time=None, end_time=None, category=None, description=None):
+    """
+    Update an existing activity
+    
+    Args:
+        activity_id: ID of activity to update
+        start_time: new start time (optional)
+        end_time: new end time (optional)
+        category: new category (optional)
+        description: new description (optional)
+    
+    Returns:
+        bool: True if updated successfully, False if activity not found
+    """
+    connection = sqlite3.connect(database_path)
+    cursor = connection.cursor()
+    
+    cursor.execute('SELECT id FROM activities WHERE id = ?', (activity_id,))
+    if not cursor.fetchone():
+        connection.close()
+        return False
+    
+    fields = []
+    values = []
+    
+    if start_time is not None:
+        fields.append('start_time = ?')
+        values.append(str_to_datetime(start_time))
+    if end_time is not None:
+        fields.append('end_time = ?')
+        values.append(str_to_datetime(end_time))
+    if category is not None:
+        fields.append('category = ?')
+        values.append(category)
+    if description is not None:
+        fields.append('description = ?')
+        values.append(description)
+    
+    if fields:
+        values.append(activity_id)
+        query = f'UPDATE activities SET {", ".join(fields)} WHERE id = ?'
+        cursor.execute(query, tuple(values))
+    
+    connection.commit()
+    connection.close()
+    
+    return True
 
 
 
@@ -452,7 +504,7 @@ def delete_exercise(exercise_id):
                                                               
 
 
-def create_workout(exercise_id, sets, reps, weight=None):
+def create_workout(exercise_id, sets, reps, weight=None, timestamp=None):
     """
     Create a new workout record
     
@@ -461,6 +513,7 @@ def create_workout(exercise_id, sets, reps, weight=None):
         sets: number of sets
         reps: number of repetitions
         weight: weight used (optional)
+        timestamp: workout timestamp (optional, defaults to current time)
     
     Returns:
         int: ID of created workout
@@ -468,10 +521,17 @@ def create_workout(exercise_id, sets, reps, weight=None):
     connection = sqlite3.connect(database_path)
     cursor = connection.cursor()
     
-    cursor.execute('''
-        INSERT INTO workouts (exercise_id, sets, reps, weight)
-        VALUES (?, ?, ?, ?)
-    ''', (exercise_id, sets, reps, weight))
+    if timestamp:
+        timestamp_str = str_to_datetime(timestamp)
+        cursor.execute('''
+            INSERT INTO workouts (exercise_id, sets, reps, weight, timestamp)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (exercise_id, sets, reps, weight, timestamp_str))
+    else:
+        cursor.execute('''
+            INSERT INTO workouts (exercise_id, sets, reps, weight)
+            VALUES (?, ?, ?, ?)
+        ''', (exercise_id, sets, reps, weight))
     
     workout_id = cursor.lastrowid
     connection.commit()
@@ -523,7 +583,7 @@ def get_workouts(day_offset=0):
     return workouts
 
 
-def update_workout(workout_id, exercise_id=None, sets=None, reps=None, weight=None):
+def update_workout(workout_id, exercise_id=None, sets=None, reps=None, weight=None, timestamp=None):
     """
     Update an existing workout record
     
@@ -533,6 +593,7 @@ def update_workout(workout_id, exercise_id=None, sets=None, reps=None, weight=No
         sets: new number of sets (optional)
         reps: new number of repetitions (optional)
         weight: new weight used (optional)
+        timestamp: new workout timestamp (optional)
     
     Returns:
         bool: True if updated successfully, False if workout not found
@@ -560,6 +621,9 @@ def update_workout(workout_id, exercise_id=None, sets=None, reps=None, weight=No
     if weight is not None:
         fields.append('weight = ?')
         values.append(weight)
+    if timestamp is not None:
+        fields.append('timestamp = ?')
+        values.append(str_to_datetime(timestamp))
     
     if fields:
         values.append(workout_id)
@@ -825,5 +889,8 @@ def get_messages(limit=10):
         })
     
     return messages
+
+
+
 
 init_database()
