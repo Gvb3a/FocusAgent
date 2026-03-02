@@ -1,15 +1,12 @@
 import os
 import json
 import database
-import system_api
 from datetime import datetime
 from google import genai
 from google.genai import types
-from rich.console import Console
 from config import config, FUNCTION_MAP
 
 
-console = Console()
 client = genai.Client(api_key=config.gemini_api_key)
 os.environ['GRPC_DNS_RESOLVER'] = 'native'
 
@@ -42,27 +39,24 @@ def _convert_messages(messages):
     return contents
 
 
-def execute_function(function_call, print_result=True):
-    """Execute a function call and return the result"""
+def execute_function(function_call):
+    """Execute a function call and return the result and call info"""
     function_name = function_call.name
     function_args = dict(function_call.args)
     
     if function_name not in FUNCTION_MAP:
-        console.print(f"[red bold]◉ Failed: Function {function_name} not found[/red bold]")
-        return {"error": f"Function {function_name} not found"}
+        print(f"\033[1;31m◉ Failed: Function {function_name} not found\033[0m")
+        return {"error": f"Function {function_name} not found"}, {"name": function_name, "args": function_args}
     
     try:
         result = FUNCTION_MAP[function_name](**function_args)
-        if print_result:
-            args_str = ", ".join(f"{k}: {v}" for k, v in function_args.items())
-            console.print(f"[green bold]✓ {function_name}({args_str})[/green bold]")
-        return {"result": result}
+        return {"result": result}, {"name": function_name, "args": function_args}
     except Exception as e:
-        console.print(f"[red bold]◉ Error executing {function_name}: {e}[/red bold]")
-        return {"error": str(e)}
+        print(f"\033[1;31m◉ Error executing {function_name}: {e}\033[0m")
+        return {"error": str(e)}, {"name": function_name, "args": function_args}
     
 
-def chat(user_message, tools_list=None, messages=None, print_function_calls=True, max_iterations=10):
+def gemini(user_message, tools_list=None, messages=None, max_iterations=10):
     """
     Send a message to the agent and handle function calling loop
     
@@ -70,7 +64,6 @@ def chat(user_message, tools_list=None, messages=None, print_function_calls=True
         user_message: User's message
         tools_list: List of tool names to use (defaults to conversation_tools)
         messages: Previous conversation messages in format [{'role': 'user', 'content': '...'}, ...]
-        print_function_calls: Whether to print function calls
         max_iterations: Maximum number of function calling iterations
     
     Returns:
@@ -102,6 +95,7 @@ def chat(user_message, tools_list=None, messages=None, print_function_calls=True
     else:
         contents = [types.Content(role="user", parts=[types.Part(text=user_message)])]
     
+    used_functions = []
     iteration = 0
     while iteration < max_iterations:
         iteration += 1
@@ -116,43 +110,19 @@ def chat(user_message, tools_list=None, messages=None, print_function_calls=True
         function_calls = [p.function_call for p in parts if p.function_call]
         
         if not function_calls:
-            return response.text
+            return response.text, used_functions
 
         contents.append(response.candidates[0].content)
         
         for function_call in function_calls:
-            result = execute_function(function_call, print_result=print_function_calls)
+            result, func_info = execute_function(function_call)
+            used_functions.append(func_info)
             function_response = types.Part.from_function_response(
                 name=function_call.name,
                 response=result
             )
             contents.append(types.Content(role="user", parts=[function_response]))
     
-    console.print("[red bold]ERROR: Max iterations reached[/red bold]")
-    return "Max iterations reached. Please try again."
+    print("\033[1;31mERROR: Max iterations reached\033[0m")
+    return "Max iterations reached. Please try again.", used_functions
 
-
-def agent_monitoring():
-    """
-    Monitoring mode: check windows and decide if action needed
-    """
-    windows = system_api.get_windows()
-    database.log_monitoring(windows)
-    logs = database.get_monitoring_logs(hours_back=1)
-    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
-    recent_messages = database.get_messages(limit=10)
-    messages = [{'role': msg['role'], 'content': msg['content']} for msg in reversed(recent_messages)]
-    
-    prompt = config.monitoring_prompt.format(
-        current_time=current_time,
-        windows=windows,
-        logs=logs
-    )
-    
-    response = chat(prompt, tools_list=config.monitoring_tools, messages=messages, print_function_calls=False)
-    
-    return response
-
-
-# TODO: необходимо записывать если агент решает закрыть приложение. Записывать нужно со временем, но тогда и нужно время сообщений и добавить новую таблицу agent_actions

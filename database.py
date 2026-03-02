@@ -21,27 +21,14 @@ database_path = Path(__file__).parent / 'database.db'
                                                                                               
 
 
-settings = [{  # TODO: показывать ли вызовы функций
-    'key': 'GEMINI_API_KEY',
-    'description': 'API key for Google Gemini LLM',
-    'default': ''
-}, {
-    'key': 'GEMINI_MODEL',
-    'description': 'Default model for Google Gemini LLM',
-    'default': 'gemini-2.5-flash'
-}, {
-    'key': 'LANGUAGE',
-    'description': 'User interface language (en, ru)',
-    'default': ''
-}, {
-    'key': 'USERNAME',
-    'description': 'User name for greetings',
-    'default': ''
-}, {
-    'key': 'MEMORY',
-    'description': 'Memory for agent)',
-    'default': ''
-}
+settings = [
+    {'key': 'GEMINI_API_KEY', 'description': 'API key for Google Gemini LLM', 'default': ''},
+    {'key': 'GROQ_API_KEY', 'description': 'API key for Groq LLM', 'default': ''},
+    {'key': 'PROVIDER', 'description': 'Preferred LLM provider (gemini, groq)', 'default': 'gemini'},
+    {'key': 'GEMINI_MODEL', 'description': 'Default model for Google Gemini LLM', 'default': 'gemini-2.0-flash-exp'},
+    {'key': 'LANGUAGE', 'description': 'User interface language (en, ru)', 'default': ''},
+    {'key': 'USERNAME', 'description': 'User name for greetings', 'default': ''},
+    {'key': 'MEMORY', 'description': 'Memory for agent)', 'default': ''}
 ]
 
 

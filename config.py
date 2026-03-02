@@ -1,7 +1,6 @@
 import json
 import database
 import system_api
-import rich.prompt
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -54,14 +53,16 @@ FUNCTION_MAP = {
 @dataclass
 class Config:
     database_path: str = str(base_dir / "activities.db")
-    function_declarations_path: str = str(base_dir / "function_declarations.json")
-    prompts_path: str = str(base_dir / "prompts.json")
+    function_declarations_path: str = str(base_dir / "agent" / "function_declarations.json")
+    prompts_path: str = str(base_dir / "agent" / "prompts.json")
     locales_path: str = str(base_dir / "locales.json")
     log_path: str = str(base_dir / "agent.log")
 
     language: str = env_settings['LANGUAGE']
     username: str = env_settings['USERNAME']
+    provider: str = env_settings.get('PROVIDER', 'gemini')
     gemini_api_key: str = env_settings['GEMINI_API_KEY']
+    groq_api_key: str = env_settings.get('GROQ_API_KEY', '')
     gemini_model: str = env_settings['GEMINI_MODEL']
 
     monitoring_interval: int = 600
@@ -75,7 +76,7 @@ class Config:
 
     def __post_init__(self):
         # Load prompts
-        prompts = load_json(base_dir / 'prompts.json')
+        prompts = load_json(base_dir / 'agent' / 'prompts.json')
         self.system_prompt = prompts['system_prompt']
         self.monitoring_prompt = prompts['monitoring_prompt']
         

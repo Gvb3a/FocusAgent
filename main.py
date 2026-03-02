@@ -1,10 +1,14 @@
-import getpass
-import rich.prompt
-import threading
+import re
 import time
 import random
+import getpass
+import threading
+import rich.prompt
 from datetime import datetime
+from rich.live import Live
+from rich.panel import Panel
 from rich.console import Console
+from rich.markdown import Markdown
 from config import config, locales
 from database import set_setting
 
@@ -24,9 +28,35 @@ if not config.language:
 
 
 if not config.gemini_api_key:
-    gemini_api_key = rich.prompt.Prompt.ask(locales.gemini_api_warning[config.language]).strip()
-    config.gemini_api_key = gemini_api_key
-    set_setting('GEMINI_API_KEY', gemini_api_key)
+    gemini_api_key = rich.prompt.Prompt.ask("Enter Gemini API key (or press Enter to skip)").strip()
+    if gemini_api_key:
+        config.gemini_api_key = gemini_api_key
+        set_setting('GEMINI_API_KEY', gemini_api_key)
+
+if not config.groq_api_key:
+    groq_api_key = rich.prompt.Prompt.ask("Enter Groq API key (or press Enter to skip)").strip()
+    if groq_api_key:
+        config.groq_api_key = groq_api_key
+        set_setting('GROQ_API_KEY', groq_api_key)
+
+if not config.provider:
+    available_providers = []
+    if config.gemini_api_key:
+        available_providers.append('gemini')
+    if config.groq_api_key:
+        available_providers.append('groq')
+    
+    if not available_providers:
+        console.print("[red bold]No API keys provided. Please restart and enter at least one API key.[/red bold]")
+        exit(1)
+    
+    if len(available_providers) == 1:
+        config.provider = available_providers[0]
+        set_setting('PROVIDER', config.provider)
+    else:
+        provider = rich.prompt.Prompt.ask(f"Select preferred provider [{'/'.join(available_providers)}]", choices=available_providers).strip()
+        config.provider = provider
+        set_setting('PROVIDER', provider)
 
 if not config.username:
     username = rich.prompt.Prompt.ask(locales.username_warning[config.language].format(username=getpass.getuser())).strip()
@@ -51,13 +81,13 @@ def show_greeting_with_loading(username):
     
     console.clear()
     print("\033[1;36m")
-    
+    sleep_time = 0.03
     for i in range(len(greeting) + 1):
         cursor = "_" if i < len(greeting) else ""
         print(f"\r {greeting[:i]}{cursor}", end="", flush=True)
         if i < len(greeting) and greeting[i] in " ":
-            time.sleep(random.uniform(0.04, 0.12))
-        time.sleep(0.04)
+            time.sleep(random.uniform(sleep_time, sleep_time*3))
+        time.sleep(sleep_time)
     
     stop_animation = False
     def animate_dots():
@@ -71,11 +101,10 @@ def show_greeting_with_loading(username):
     dot_thread = threading.Thread(target=animate_dots, daemon=True)
     dot_thread.start()
     
-    from agent import chat, agent_monitoring
+    from agent.agent import chat, agent_monitoring
     import database
     
     stop_animation = True
-    time.sleep(0.1)
     
     for i in range(len(greeting), -1, -1):
         print(f"\r {greeting[:i]}_ ", end="", flush=True)
@@ -87,8 +116,29 @@ def show_greeting_with_loading(username):
     
     return chat, agent_monitoring, database
 
-chat, agent_monitoring, database = show_greeting_with_loading(config.username)  # Very messy code, but a beautiful result, so who cares?
 
+
+def show_logo():
+    width = console.width
+    inscriptions = locales.focus_agent_inscription
+    
+    if width >= inscriptions['ansi_shadow']['length']:
+        logo = inscriptions['ansi_shadow']['text']
+    elif width >= inscriptions['ansi_compact']['length']:
+        logo = inscriptions['ansi_compact']['text']
+    else:
+        logo = inscriptions['normal']['text']
+    
+    lines = logo.split('\n')
+    max_line_length = max(len(line) for line in lines)
+    
+    for line in lines:
+        padding = (width - max_line_length) // 2
+        console.print(' ' * padding + line)
+
+
+chat, agent_monitoring, database = show_greeting_with_loading(config.username)  # Very messy code, but a beautiful result, so who cares?
+show_logo()
 
 def monitoring_loop():
     while True:
@@ -109,6 +159,7 @@ while True:
             continue
         
         if user_input.lower() in ['exit', 'quit', 'выход']:
+            console.print("\n\n[cyan bold]Goodbye[/cyan bold]")
             break
         
         database.save_message('user', user_input)
@@ -116,12 +167,37 @@ while True:
         recent_messages = database.get_messages(limit=10)
         messages = [{'role': msg['role'], 'content': msg['content']} for msg in reversed(recent_messages)]
         
-        with console.status("[cyan]...[/cyan]", spinner="dots", spinner_style="cyan"):
-            response = chat(user_input, messages=messages)
+        with console.status("[cyan bold]Generating...[/cyan bold]", spinner="dots", spinner_style="cyan"):
+            response, used_functions = chat(user_input, messages=messages)
         
         database.save_message('model', response)
         
-        console.print(f"\n🤖 [cyan bold]FocusAgent:[/cyan bold] {response}")
+        if used_functions:
+            print("\n\033[90mUsed functions:\033[0m")
+            for func in used_functions:
+                args_str = ", ".join(f"{k}={v}" for k, v in func['args'].items())
+                print(f"  \033[32m✓\033[0m {func['name']}({args_str})")
+        
+        parts = re.split(r'(\n)', response)
+        current_text = ""
+        
+        with Live(console=console, refresh_per_second=20) as live:
+            for part in parts:
+                if part == '\n':
+                    current_text += part
+                else:
+                    words = part.split(' ')
+                    for word in words:
+                        current_text += word + " "
+                        markdown_response = Markdown(current_text)
+                        panel = Panel(
+                            markdown_response,
+                            title="[cyan bold]FocusAgent[/cyan bold]",
+                            border_style="cyan",
+                            padding=(1, 2)
+                        )
+                        live.update(panel)
+                        time.sleep(0.005)
         
     except KeyboardInterrupt:
         console.print("\n\n[cyan bold]Goodbye[/cyan bold]")
@@ -129,5 +205,3 @@ while True:
     except Exception as e:
         console.print(f"\n[red bold]Error: {e}[/red bold]")
 
-
-# todo: animation output, 
